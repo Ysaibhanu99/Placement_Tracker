@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sai Bhanu — 194-Day Placement Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ═══════════════════════════════════════
+     CSS VARIABLES — DARK (default)
+     ═══════════════════════════════════════ */
+  :root {
+    --bg: #0a0a0c;
+    --bg-card: rgba(12,12,16,0.85);
+    --bg-card-hover: rgba(255,255,255,0.015);
+    --bg-table: rgba(12,12,16,0.8);
+    --bg-th: rgba(12,12,16,0.95);
+    --bg-pre: rgba(12,12,16,0.6);
+    --border: rgba(255,255,255,0.04);
+    --border-hover: rgba(255,255,255,0.08);
+    --text: #d4cfc8;
+    --text-muted: #9b9588;
+    --text-dim: #6b6560;
+    --text-dimmer: #4a4540;
+    --text-bright: #f5f0e8;
+    --text-heading: #e8e2d6;
+    --noise-opacity: 0.5;
+    --orb-opacity: 0.12;
+    --particle-color: 217,119,6;
+    --checkbox-bg: transparent;
+    --checkbox-border: #3a3530;
+    --check-fill: #0a0a0c;
+    --holo-bg: linear-gradient(135deg, #b4530920, #0d948820, #7c3aed20, #be123c20);
+    --holo-conic-opacity: 0.2;
+    --shadow-card: 0 8px 32px rgba(0,0,0,0.3);
+    --done-bg: rgba(217,119,6,0.02);
+    --done-hover: rgba(217,119,6,0.04);
+    --current-bg: rgba(245,158,11,0.04);
+    --current-hover: rgba(245,158,11,0.07);
+    --review-bg: rgba(45,212,191,0.02);
+    --review-hover: rgba(45,212,191,0.04);
+    --assess-bg: rgba(192,132,252,0.02);
+    --assess-hover: rgba(192,132,252,0.04);
+    --scrollbar-thumb: rgba(217,119,6,0.2);
+    --today-panel-glow: rgba(245,158,11,0.06);
+  }
+
+  /* ═══════════════════════════════════════
+     LIGHT THEME
+     ═══════════════════════════════════════ */
+  body.light {
+    --bg: #f4f1ec;
+    --bg-card: rgba(255,255,255,0.85);
+    --bg-card-hover: rgba(0,0,0,0.015);
+    --bg-table: rgba(255,255,255,0.9);
+    --bg-th: rgba(245,242,237,0.98);
+    --bg-pre: rgba(245,242,237,0.8);
+    --border: rgba(0,0,0,0.06);
+    --border-hover: rgba(0,0,0,0.1);
+    --text: #3d3830;
+    --text-muted: #6b6560;
+    --text-dim: #9b9588;
+    --text-dimmer: #b8b0a4;
+    --text-bright: #1a1612;
+    --text-heading: #2a2520;
+    --noise-opacity: 0.15;
+    --orb-opacity: 0.06;
+    --particle-color: 180,90,10;
+    --checkbox-bg: #fff;
+    --checkbox-border: #c8c0b4;
+    --check-fill: #fff;
+    --holo-bg: linear-gradient(135deg, #b4530910, #0d948810, #7c3aed10, #be123c10);
+    --holo-conic-opacity: 0.08;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.06);
+    --done-bg: rgba(217,119,6,0.04);
+    --done-hover: rgba(217,119,6,0.07);
+    --current-bg: rgba(245,158,11,0.06);
+    --current-hover: rgba(245,158,11,0.1);
+    --review-bg: rgba(13,148,136,0.04);
+    --review-hover: rgba(13,148,136,0.07);
+    --assess-bg: rgba(124,58,237,0.04);
+    --assess-hover: rgba(124,58,237,0.07);
+    --scrollbar-thumb: rgba(180,83,9,0.15);
+    --today-panel-glow: rgba(245,158,11,0.08);
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    color: var(--text);
+    font-size: 13.5px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow-x: hidden;
+    transition: background 0.5s, color 0.5s;
+  }
+
+  /* Noise texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999;
+    opacity: var(--noise-opacity);
+  }
+
+  /* Background mesh */
+  .bg-mesh { position: fixed; inset: 0; z-index: -1; overflow: hidden; transition: opacity 0.5s; }
+  .bg-mesh .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: var(--orb-opacity); transition: opacity 0.5s; }
+  .bg-mesh .orb:nth-child(1) { width:700px;height:700px;background:#b45309;top:-20%;left:-10%;animation:drift1 30s ease-in-out infinite }
+  .bg-mesh .orb:nth-child(2) { width:500px;height:500px;background:#0d9488;top:40%;right:-15%;animation:drift2 25s ease-in-out infinite }
+  .bg-mesh .orb:nth-child(3) { width:600px;height:600px;background:#7c3aed;bottom:-10%;left:30%;animation:drift3 35s ease-in-out infinite }
+  .bg-mesh .orb:nth-child(4) { width:400px;height:400px;background:#be123c;top:20%;left:50%;animation:drift4 28s ease-in-out infinite }
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(120px,80px) scale(1.1)}66%{transform:translate(-60px,120px) scale(0.9)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-100px,-60px) scale(1.15)}66%{transform:translate(60px,-90px) scale(0.85)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,-100px) scale(1.1)}}
+  @keyframes drift4{0%,100%{transform:translate(0,0)}33%{transform:translate(-80px,60px)}66%{transform:translate(40px,-40px)}}
+
+  #particles { position:fixed;inset:0;z-index:-1;pointer-events:none }
+
+  /* Animations */
+  @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes slideLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes scaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.3)}50%{box-shadow:0 0 0 12px rgba(245,158,11,0)}}
+  @keyframes flame{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.2) rotate(3deg)}}
+  @keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+  @keyframes todayPulse{0%{border-color:rgba(245,158,11,0.15)}50%{border-color:rgba(245,158,11,0.4)}100%{border-color:rgba(245,158,11,0.15)}}
+
+  .anim-up{opacity:0;animation:slideUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards}
+  .anim-left{opacity:0;animation:slideLeft 0.7s cubic-bezier(0.22,1,0.36,1) forwards}
+  .anim-scale{opacity:0;animation:scaleIn 0.6s cubic-bezier(0.22,1,0.36,1) forwards}
+
+  /* Typography */
+  h1{font-size:30px;font-weight:700;letter-spacing:-1px;color:var(--text-bright);margin-bottom:10px;position:relative;display:inline-block}
+  h1::after{content:'';position:absolute;bottom:-4px;left:0;width:60px;height:3px;background:linear-gradient(90deg,#d97706,#f59e0b);border-radius:3px}
+  h3{color:var(--text-heading);font-size:15px;font-weight:600;margin-bottom:14px}
+  a{color:#f59e0b;text-decoration:none;font-weight:500;transition:color 0.2s}
+  a:hover{color:#fbbf24}
+
+  /* Holo Card */
+  .holo-card{position:relative;border-radius:16px;padding:2px;background:var(--holo-bg);overflow:hidden}
+  .holo-card::before{content:'';position:absolute;inset:-50%;background:conic-gradient(from 0deg,#b45309,#0d9488,#7c3aed,#be123c,#b45309);animation:rotateBorder 6s linear infinite;opacity:var(--holo-conic-opacity)}
+  .holo-card:hover::before{opacity:calc(var(--holo-conic-opacity) * 2)}
+  @keyframes rotateBorder{to{transform:rotate(360deg)}}
+  .holo-inner{background:var(--bg-card);backdrop-filter:blur(20px);border-radius:14px;padding:24px 28px;position:relative;z-index:1;transition:background 0.5s}
+
+  /* Profile */
+  .profile{margin-bottom:28px}
+  .profile .holo-inner{padding:28px 32px}
+  .profile p{margin:6px 0;color:var(--text-muted);font-size:13.5px}
+  .profile strong{color:var(--text);font-weight:600}
+  .comm-note{color:var(--text-dim)!important;font-style:italic;font-size:12.5px!important;margin-top:12px!important;padding-top:12px;border-top:1px solid var(--border)}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:28px;perspective:800px}
+  @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:500px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{text-align:center;cursor:default;transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);transform-style:preserve-3d}
+  .stat .holo-inner{padding:20px 14px}
+  .stat:hover{transform:translateY(-6px) rotateX(4deg)}
+  .stat-num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;letter-spacing:-1px;margin-bottom:6px}
+  .stat:nth-child(1) .stat-num{color:#f97316}
+  .stat:nth-child(2) .stat-num{color:#2dd4bf}
+  .stat:nth-child(3) .stat-num{color:#fb7185}
+  .stat:nth-child(4) .stat-num{color:#a3e635}
+  .stat:nth-child(5) .stat-num{color:#c084fc}
+  .stat:nth-child(6) .stat-num{color:#38bdf8;font-size:19px}
+  .stat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+
+  /* Streak flame */
+  .streak-flame{display:inline-block;animation:flame 0.6s ease-in-out infinite;transform-origin:bottom center;font-size:18px;margin-left:2px;vertical-align:middle}
+
+  /* Countdown */
+  .countdown-wrap{margin-bottom:28px}
+  .countdown-wrap .holo-inner{padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .countdown-label{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.2px;font-weight:600}
+  .countdown-timer{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#fb7185;letter-spacing:0.5px}
+  .countdown-timer span{color:var(--text-dimmer);font-weight:400;font-size:12px;margin:0 2px}
+
+  /* Progress */
+  .progress-wrap{margin-bottom:8px}
+  .progress-wrap .holo-inner{padding:22px 28px}
+  .progress-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .progress-title{font-size:12px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.2px}
+  .progress-pct{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--text-bright)}
+  .progress-track{width:100%;height:6px;background:var(--border);border-radius:999px;overflow:visible;position:relative}
+  .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#b45309,#d97706,#f59e0b);width:0%;transition:width 2s cubic-bezier(0.22,1,0.36,1);position:relative}
+  .progress-fill::after{content:'';position:absolute;right:-4px;top:-3px;width:12px;height:12px;background:#f59e0b;border-radius:50%;box-shadow:0 0 16px #f59e0b80,0 0 40px #f59e0b40}
+  .progress-phases{display:flex;justify-content:space-between;margin-top:12px;font-size:11px;color:var(--text-dimmer);font-weight:500}
+  .progress-phases span.active{color:#f59e0b}
+
+  /* Weekly stats */
+  .weekly-stats{padding:8px 28px 0;font-size:12px;color:var(--text-dim);margin-bottom:28px;text-align:right}
+  .weekly-stats strong{color:var(--text-muted);font-weight:600}
+
+  /* Today Panel */
+  .today-panel{margin-bottom:28px}
+  .today-panel .holo-inner{padding:24px 28px;border:1px solid rgba(245,158,11,0.1);animation:todayPulse 3s ease-in-out infinite}
+  .today-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+  .today-title{font-size:16px;font-weight:700;color:var(--text-bright)}
+  .today-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);background:var(--today-panel-glow);padding:4px 12px;border-radius:8px}
+  .today-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .today-track{padding:14px 16px;border-radius:10px;background:var(--today-panel-glow);border:1px solid rgba(245,158,11,0.06)}
+  .today-track-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .today-track.dsa .today-track-title{color:#f97316}
+  .today-track.fs .today-track-title{color:#2dd4bf}
+  .today-track.apt .today-track-title{color:#c084fc}
+  .today-track.cs .today-track-title{color:#fb7185}
+
+  /* Completion ring */
+  .completion-ring{position:relative;width:52px;height:52px;flex-shrink:0}
+  .completion-ring svg{transform:rotate(-90deg)}
+  .completion-ring .ring-bg{fill:none;stroke:var(--border);stroke-width:4}
+  .completion-ring .ring-fill{fill:none;stroke:#f59e0b;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1)}
+  .completion-ring .ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--text-bright)}
+
+  /* Sections */
+  .section{margin-bottom:20px}
+  .section .holo-inner{position:relative;padding-left:36px}
+  .section .holo-inner::before{content:'';position:absolute;top:20px;left:20px;bottom:20px;width:3px;border-radius:3px}
+  .section.rules .holo-inner::before{background:linear-gradient(180deg,#d97706,#f59e0b)}
+  .section.danger .holo-inner::before{background:linear-gradient(180deg,#be123c,#fb7185)}
+  .section ul{list-style:none;padding:0}
+  .section li{padding:8px 0 8px 16px;position:relative;color:var(--text-muted);font-size:13px;border-bottom:1px solid var(--border)}
+  .section li:last-child{border-bottom:none}
+  .section li::before{content:'›';position:absolute;left:0;top:8px;color:var(--text-dim);font-weight:700;font-size:15px}
+  .section li strong{color:var(--text)}
+
+  /* Phase bars */
+  .phase-bar{margin:40px 0 16px;border-radius:16px;overflow:hidden}
+  .phase-bar .holo-inner{padding:20px 28px;display:flex;align-items:center;gap:20px}
+  .phase-num{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;opacity:0.15;line-height:1;min-width:50px}
+  .phase-bar h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-0.3px}
+  .phase-bar p{margin:0;color:var(--text-dim);font-size:13px}
+  .phase-bar.p1 h3,.phase-bar.p1 .phase-num{color:#fbbf24}
+  .phase-bar.p2 h3,.phase-bar.p2 .phase-num{color:#2dd4bf}
+  .phase-bar.p3 h3,.phase-bar.p3 .phase-num{color:#c084fc}
+  .phase-bar.p4 h3,.phase-bar.p4 .phase-num{color:#4ade80}
+
+  /* Tables */
+  .table-wrap{border-radius:16px;overflow:hidden;margin-bottom:32px;position:relative;padding:2px;background:linear-gradient(135deg,rgba(255,255,255,0.03),transparent)}
+  .table-inner{background:var(--bg-table);border-radius:14px;overflow:hidden;transition:background 0.5s}
+  table{width:100%;border-collapse:collapse}
+  th{background:var(--bg-th);color:var(--text-dim);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;padding:16px 18px;text-align:left;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);transition:background 0.5s}
+  td{padding:16px 18px;vertical-align:top;background:transparent;border-bottom:1px solid var(--border);transition:background 0.25s;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  tr td:first-child{font-weight:600;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-muted);position:relative;border-left:3px solid transparent}
+  tr:hover td{background:var(--bg-card-hover)}
+
+  tr.done td{background:var(--done-bg)}
+  tr.done td:first-child{border-left-color:#d97706}
+  tr.done:hover td{background:var(--done-hover)}
+  tr.current td{background:var(--current-bg)}
+  tr.current td:first-child{border-left-color:#f59e0b}
+  tr.current:hover td{background:var(--current-hover)}
+  tr.review td{background:var(--review-bg)}
+  tr.review td:first-child{border-left-color:#2dd4bf}
+  tr.review:hover td{background:var(--review-hover)}
+  tr.assess td{background:var(--assess-bg)}
+  tr.assess td:first-child{border-left-color:#c084fc}
+  tr.assess:hover td{background:var(--assess-hover)}
+
+  /* Today row pulse on scroll */
+  tr.current.highlight-pulse td{animation:pulse 1.5s ease-out 1}
+
+  /* Tags */
+  .tag{display:inline-flex;align-items:center;padding:2px 10px;border-radius:6px;font-size:9px;font-weight:700;margin-left:8px;letter-spacing:0.8px;font-family:'JetBrains Mono',monospace}
+  .t-done{background:rgba(217,119,6,0.12);color:#fbbf24}
+  .t-curr{background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.2)}
+  .t-review{background:rgba(45,212,191,0.1);color:#5eead4}
+  .t-assess{background:rgba(192,132,252,0.1);color:#d8b4fe}
+  .date-label{display:block;font-size:11px;color:var(--text-dimmer);font-weight:400;margin-top:5px;font-family:'Space Grotesk',sans-serif}
+
+  /* Checkboxes */
+  .task-item{display:flex;gap:10px;align-items:flex-start;padding:5px 0}
+  .task-item label{cursor:pointer;line-height:1.55;color:var(--text-muted);transition:all 0.35s;text-decoration:line-through transparent;text-decoration-thickness:1px}
+  .task-item.checked label{color:var(--text-dimmer);text-decoration-color:var(--text-dimmer)}
+  input[type="checkbox"]{appearance:none;-webkit-appearance:none;width:18px;height:18px;min-width:18px;border:2px solid var(--checkbox-border);border-radius:4px;background:var(--checkbox-bg);cursor:pointer;display:grid;place-content:center;margin-top:2px;transition:all 0.3s cubic-bezier(0.22,1,0.36,1)}
+  input[type="checkbox"]::before{content:'';width:10px;height:10px;transform:scale(0) rotate(-45deg);transition:transform 0.2s cubic-bezier(0.22,1,0.36,1);clip-path:polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%);background:var(--check-fill)}
+  input[type="checkbox"]:checked{background:#d97706;border-color:#d97706;border-radius:50%;box-shadow:0 0 12px rgba(217,119,6,0.3)}
+  input[type="checkbox"]:checked::before{transform:scale(1) rotate(0deg)}
+  input[type="checkbox"]:hover{border-color:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,0.06)}
+
+  /* Context block */
+  pre{font-family:'JetBrains Mono',monospace;background:var(--bg-pre);padding:20px;border-radius:10px;overflow-x:auto;font-size:11.5px;white-space:pre-wrap;border:1px solid var(--border);color:var(--text-dim);line-height:1.8;transition:background 0.5s}
+
+  /* ═══════════════════════════════════════
+     THEME TOGGLE
+     ═══════════════════════════════════════ */
+  .theme-toggle{position:fixed;top:24px;right:24px;z-index:10000;width:48px;height:48px;border-radius:50%;border:2px solid var(--border);background:var(--bg-card);backdrop-filter:blur(10px);cursor:pointer;display:grid;place-content:center;font-size:20px;transition:all 0.3s;box-shadow:var(--shadow-card)}
+  .theme-toggle:hover{transform:scale(1.1);border-color:var(--border-hover)}
+
+  /* ═══════════════════════════════════════
+     JUMP TO TODAY BUTTON
+     ═══════════════════════════════════════ */
+  .jump-today{position:fixed;bottom:32px;right:32px;z-index:10000;padding:12px 20px;border-radius:50px;border:none;background:linear-gradient(135deg,#d97706,#f59e0b);color:#0a0a0c;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(245,158,11,0.3);transition:all 0.3s;display:flex;align-items:center;gap:8px;letter-spacing:0.3px}
+  .jump-today:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(245,158,11,0.4)}
+  .jump-today svg{width:16px;height:16px}
+
+  /* ═══════════════════════════════════════
+     CONFETTI
+     ═══════════════════════════════════════ */
+  .confetti-piece{position:fixed;width:8px;height:8px;top:-10px;z-index:99999;border-radius:2px;animation:confettiFall 3s linear forwards;pointer-events:none}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:999px}
+  ::selection{background:rgba(217,119,6,0.3);color:var(--text-bright)}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+<canvas id="particles"></canvas>
+
+<!-- THEME TOGGLE -->
+<button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+
+<!-- JUMP TO TODAY -->
+<button class="jump-today" id="jumpToday" title="Press T to jump">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+  Today
+</button>
+
+<!-- PROFILE -->
+<div class="profile holo-card anim-up" style="animation-delay:0.05s">
+  <div class="holo-inner">
+    <h1>Sai Bhanu — 194-Day Placement Prep Tracker</h1>
+    <p><strong>College:</strong> Sri GCSR Degree College, Rajam, Andhra Pradesh &nbsp;|&nbsp; <strong>Degree:</strong> BCA 5th Semester</p>
+    <p><strong>Target:</strong> Full Stack Developer (Primary) &nbsp;|&nbsp; AI/ML Engineer (Secondary) &nbsp;|&nbsp; 8–12 LPA</p>
+    <p><strong>Placements:</strong> January 2027 &nbsp;|&nbsp; <strong>Today:</strong> Day 8 &nbsp;|&nbsp; <strong>GitHub:</strong> <a href="https://github.com/Ysaibhanu99/DSA_Prep" target="_blank">Ysaibhanu99/DSA_Prep</a></p>
+    <p><strong>Daily:</strong> 4 hrs &nbsp;|&nbsp; 5 tracks &nbsp;|&nbsp; GitHub push = DSA proof &nbsp;|&nbsp; Paper photo = Aptitude proof &nbsp;|&nbsp; Screenshot = Core CS proof</p>
+    <p class="comm-note">Communication track (daily all phases): Watch BBC video/article → summarize in formal English → type in chat. No slang. Proofread before sending.</p>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats anim-up" style="animation-delay:0.12s">
+  <div class="stat holo-card"><div class="holo-inner"><div class="stat-num" id="streakStat">7</div><div class="stat-label">Day Streak</div></div></div>
+  <div class="stat holo-card"><div class="holo-inner"><div class="stat-num">8</div><div class="stat-label">Current Day</div></div></div>
+  <div class="stat holo-card"><div class="holo-inner"><div class="stat-num">186</div><div class="stat-label">Days Left</div></div></div>
+  <div class="stat holo-card"><div class="holo-inner"><div class="stat-num">18</div><div class="stat-label">HR Solved</div></div></div>
+  <div class="stat holo-card"><div class="holo-inner"><div class="stat-num">4.1%</div><div class="stat-label">Complete</div></div></div>
+  <div class="stat holo-card"><div class="holo-inner"><div class="stat-num">Jan 2027</div><div class="stat-label">Placement</div></div></div>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="countdown-wrap holo-card anim-up" style="animation-delay:0.15s">
+  <div class="holo-inner">
+    <span class="countdown-label">⏱ Countdown to Placements</span>
+    <div class="countdown-timer" id="countdown"></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap holo-card anim-up" style="animation-delay:0.18s">
+  <div class="holo-inner" id="progress-bar"></div>
+</div>
+<div class="weekly-stats anim-up" style="animation-delay:0.2s" id="weeklyStats"></div>
+
+<!-- TODAY'S TASKS PANEL -->
+<div class="today-panel holo-card anim-scale" style="animation-delay:0.22s">
+  <div class="holo-inner" id="todayPanel"></div>
+</div>
+
+<!-- RULES -->
+<div class="section rules holo-card anim-left" style="animation-delay:0.26s">
+  <div class="holo-inner">
+    <h3>Accountability Rules — Non-Negotiable</h3>
+    <ul>
+      <li><strong>DSA:</strong> Push to GitHub every day. No push = day not counted. Verify link before claiming done.</li>
+      <li><strong>Aptitude:</strong> Handwritten working on paper. Photo proof required. No calculator.</li>
+      <li><strong>Core CS:</strong> Sanfoundry screenshot required. ONE TAB during test. No AI tabs open.</li>
+      <li><strong>Full Stack:</strong> Working file pushed to GitHub. Code snippets in chat don't count.</li>
+      <li><strong>Communication:</strong> Formal English. Zero slang. Proofread before sending.</li>
+      <li><strong>Dead code rule:</strong> Read solution top-to-bottom before every push. No dead code after return.</li>
+      <li><strong>Debt rule:</strong> Carried tasks stack. Miss 80% Day N → Day N+1 carries that 80% extra.</li>
+      <li><strong>No verbal claims:</strong> "I will do it" = nothing. Only proof counts.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section danger holo-card anim-left" style="animation-delay:0.3s">
+  <div class="holo-inner">
+    <h3>Known Avoidance Patterns (Call Out Immediately)</h3>
+    <ul>
+      <li>Generating new plans / tools instead of executing existing work</li>
+      <li>Asking for links / resources when code editor should already be open</li>
+      <li>Negotiating tasks after explicitly committing to them</li>
+      <li>Disappearing when material gets hard (happened at Day 4 old plan, Days 1–3 DSA copying)</li>
+      <li>Dead code before pushing (hacker9, hacker12, hacker14, hacker17 — recurring)</li>
+      <li>Sending preference tag repeatedly (does not change anything)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- PHASE 1 -->
+<div class="phase-bar p1 holo-card anim-scale" style="animation-delay:0.1s"><div class="holo-inner"><div class="phase-num">01</div><div><h3>Phase 1: Foundation (Days 1–30)</h3><p>Build execution habit + solve HackerRank Easy independently + JS fundamentals + Basic Aptitude rotation</p></div></div></div>
+<div class="table-wrap anim-up" style="animation-delay:0.15s"><div class="table-inner"><table>
+  <tr><th width="5%">Day</th><th width="28%">DSA — HackerRank (Python, push GitHub)</th><th width="22%">Full Stack — javascript.info / React</th><th width="20%">Aptitude — IndiaBix (paper, photo)</th><th width="25%">Core CS — Sanfoundry (screenshot)</th></tr>
+  <tr class="done"><td>1 <span class="tag t-done">✅</span></td><td>hacker1: Solve Me First<br>hacker2: Simple Array Sum<br>hacker3: Compare Triplets</td><td>Python built-ins study: sum, zip, enumerate, map, filter</td><td>—</td><td>—</td></tr>
+  <tr class="done"><td>2 <span class="tag t-done">✅</span></td><td>hacker4: A Very Big Sum<br>hacker5: Plus Minus<br>hacker6: Diagonal Difference</td><td>JS array methods: map, filter, reduce (coded examples)</td><td>Numbers ✅ (14/14 verified)</td><td>DBMS Normalization Test 1 ✅ (20/20)</td></tr>
+  <tr class="done"><td>3 <span class="tag t-done">✅</span></td><td>hacker7: Mini-Max Sum<br>hacker8: Birthday Cake Candles<br>hacker9: Time Conversion</td><td>JS Promises + async/await (both versions coded)</td><td>HCF &amp; LCM ✅</td><td>OS Process Management ✅ (17/20)</td></tr>
+  <tr class="done"><td>4 <span class="tag t-done">✅</span></td><td>hacker10: Staircase<br>hacker11: Counting Valleys<br>hacker12: Sock Merchant</td><td>DOM Manipulation — dom_practice.html (Task Manager app)</td><td>Percentages ✅</td><td>DBMS Relational Model Test 1 ✅ (20/20)</td></tr>
+  <tr class="done"><td>5 <span class="tag t-done">✅</span></td><td>hacker13: Electronics Shop<br>hacker14: Drawing Book<br>hacker15: Cats &amp; Mouse</td><td>Fetch API — fetch_practice.js (.then + async/await + error handling)</td><td>Time &amp; Work ✅</td><td>OS Memory Management ✅</td></tr>
+  <tr class="done"><td>6 <span class="tag t-done">✅</span> (partial)</td><td>hacker16: Breaking Records<br>hacker17: Migratory Birds<br>hacker18: Picking Numbers</td><td>— (uncle retirement function, 3AM wake-up)</td><td>Time &amp; Distance ✅</td><td>OS CPU Scheduling ✅ (20/20)</td></tr>
+  <tr class="done review"><td>7 <span class="tag t-done">✅</span> <span class="tag t-review">REVIEW</span></td><td>review1.py — rewrote hacker13 (Electronics Shop) from scratch</td><td>fetch_dom.html — fetch todos + render in DOM (Fetch + DOM combined)</td><td>—</td><td>—</td></tr>
+  <tr class="current"><td>8 <span class="tag t-curr">TODAY</span></td><td>hacker19: Climbing the Leaderboard<br>hacker20: The Hurdle Race<br>hacker21: Designer PDF Viewer</td><td>fetch_dom.html — fetch jsonplaceholder/todos, display first 5 in DOM</td><td>Profit &amp; Loss — 10 problems paper</td><td>OS Memory Management — Sanfoundry test</td></tr>
+  <tr><td>9</td><td>Utopian Tree<br>Angry Professor<br>Beautiful Days at the Movies</td><td>JSON handling + parse API responses</td><td>Averages</td><td>DBMS SQL Fundamentals Test</td></tr>
+  <tr><td>10</td><td>Viral Advertising<br>Save the Prisoner<br>Repeated String</td><td>LocalStorage basics — save and retrieve data</td><td>Ratio &amp; Proportion</td><td>CN — OSI Model Test</td></tr>
+  <tr><td>11</td><td>Jumping on the Clouds<br>Equalize the Array<br>Cut the Sticks</td><td>React setup + first component (CRA or Vite)</td><td>Simple Interest</td><td>DBMS — Joins Test</td></tr>
+  <tr><td>12</td><td>Library Fine<br>Circular Array Rotation<br>Grading Students</td><td>React props + state (useState)</td><td>Compound Interest</td><td>OS — Deadlocks Test</td></tr>
+  <tr><td>13</td><td>Apple and Orange<br>Kangaroo<br>Number Line Jumps</td><td>React useEffect</td><td>Ages</td><td>CN — TCP/IP Test</td></tr>
+  <tr class="review"><td>14 <span class="tag t-review">REVIEW</span></td><td>Retry 3 hardest from Days 8–13. No looking at old code. 20 min each.</td><td>React conditional rendering + lists + keys</td><td>—</td><td>DBMS Transactions/ACID Test</td></tr>
+  <tr class="assess"><td>15 <span class="tag t-assess">ASSESS</span></td><td>3 completely random Easy problems — unseen. 20 min each. No hints. Self-assess honestly.</td><td>React forms (controlled components)</td><td>Trains</td><td>OS Virtual Memory Test</td></tr>
+  <tr><td>16</td><td>Max Min<br>Chocolate Feast<br>Service Lane</td><td>React: lifting state up</td><td>Boats &amp; Streams</td><td>CN — HTTP/HTTPS Test</td></tr>
+  <tr><td>17</td><td>Lisa's Workbook<br>Flatland Space Stations<br>Fair Rations</td><td>React Router basics (navigation)</td><td>Pipes &amp; Cisterns</td><td>DBMS Indexing Test</td></tr>
+  <tr><td>18</td><td>Cavity Map<br>Manasa and Stones<br>Find the Median</td><td>React: fetch + display API data in component</td><td>Mixtures &amp; Alligation</td><td>OS File Systems Test</td></tr>
+  <tr><td>19</td><td>ACM ICPC Team<br>Taum and B'day<br>Organizing Containers</td><td>Mini React project: Todo App with API</td><td>Partnership</td><td>CN — DNS Test</td></tr>
+  <tr><td>20</td><td>Encryption<br>Modified Kaprekar<br>Beautiful Triplets (Easy)</td><td>Node.js basics — modules, require, file system</td><td>Permutations</td><td>DBMS ER Diagrams Test</td></tr>
+  <tr><td>21</td><td>Absolute Permutation (Easy)<br>Divisible Sum Pairs<br>Angry Professor (retry)</td><td>Express server setup + basic routes</td><td>Combinations</td><td>OS Paging/Segmentation Test</td></tr>
+  <tr class="review"><td>22 <span class="tag t-review">REVIEW</span></td><td>Rewrite 2 hardest solutions from Week 3 from scratch. No looking.</td><td>REST API with Express (GET/POST/DELETE)</td><td>Probability</td><td>CN Routing Protocols Test</td></tr>
+  <tr><td>23</td><td>Strings: Strong Password<br>Two Characters<br>Caesar Cipher</td><td>Connect React frontend to Express API</td><td>Data Interpretation</td><td>DBMS SQL Advanced (Subqueries)</td></tr>
+  <tr><td>24</td><td>Hashing: Frequency Queries<br>Sherlock and Array<br>Pairs</td><td>PostgreSQL basics + connect to Express</td><td>Number Series</td><td>OS I/O Management Test</td></tr>
+  <tr><td>25</td><td>Sets/Dict: Triple Sum<br>Count Triplets<br>Two Sum variant</td><td>Full Stack Project 1: Start (React + Express + PostgreSQL)</td><td>Clocks</td><td>CN Network Security basics</td></tr>
+  <tr><td>26</td><td>Arrays Medium: Minimum Swaps 2<br>Array Manipulation<br>2D Array DS</td><td>Full Stack Project 1: Finish core features</td><td>Calendars</td><td>DBMS Concurrency Control Test</td></tr>
+  <tr><td>27</td><td>Mock OA simulation: 3 problems, 60 min, no external help allowed</td><td>Full Stack Project 1: Deploy to Render/Netlify</td><td>Logical Reasoning intro (Syllogisms)</td><td>OS full revision — all topics</td></tr>
+  <tr><td>28</td><td>Redo 3 slowest problems from Phase 1. Time yourself.</td><td>Project 1: README + demo video</td><td>Verbal Ability intro</td><td>DBMS full revision — all topics</td></tr>
+  <tr><td>29</td><td>Full mock OA: 4 problems, 90 minutes. No help.</td><td>GitHub profile cleanup + all READMEs</td><td>Mixed review — 20 problems timed</td><td>CN full revision — all topics</td></tr>
+  <tr class="assess"><td>30 <span class="tag t-assess">PHASE 1 ASSESSMENT</span></td><td>5 random Easy + 1 Medium — completely unseen. 2 hours. Grade yourself honestly.</td><td>Code review: all JS/React files. Fix issues. Remove dead code.</td><td>Mixed: 20 problems all topics</td><td>Mixed: DBMS + OS + CN combined</td></tr>
+</table></div></div>
+
+<!-- PHASE 2 -->
+<div class="phase-bar p2 holo-card anim-scale" style="animation-delay:0.1s"><div class="holo-inner"><div class="phase-num">02</div><div><h3>Phase 2: Core Skills (Days 31–90)</h3><p>DSA patterns (Two Pointers, Sliding Window, Hashing, Binary Search, Stacks, Linked Lists) + React full app + Advanced Aptitude</p></div></div></div>
+<div class="table-wrap anim-up" style="animation-delay:0.15s"><div class="table-inner"><table>
+  <tr><th width="8%">Days</th><th width="25%">DSA Focus</th><th width="25%">Full Stack Focus</th><th width="20%">Aptitude Focus</th><th width="22%">Core CS Focus</th></tr>
+  <tr><td>31–37</td><td>Two Pointers pattern — 15 problems (HackerRank + LeetCode Easy/Medium)</td><td>React Project: Weather App (API + state + routing)</td><td>Logical Reasoning: Syllogisms, Blood Relations, Coding-Decoding</td><td>SQL deep dive: complex joins, subqueries, GROUP BY, HAVING</td></tr>
+  <tr><td>38–44</td><td>Sliding Window — 15 problems</td><td>Node.js + PostgreSQL CRUD API (full REST)</td><td>Verbal: Reading Comprehension, Para Jumbles, Fill in Blanks</td><td>OS: Scheduling algorithms — manual Gantt chart calculation</td></tr>
+  <tr><td>45–51</td><td>Hashing — 15 problems (frequency, anagrams, two sum variants)</td><td>JWT Authentication: login, protect routes, refresh tokens</td><td>Data Interpretation: Tables, Bar Charts, Pie Charts, Line Graphs</td><td>CN: Subnetting, IP addressing, CIDR notation</td></tr>
+  <tr><td>52–58</td><td>Prefix Sum — 10 problems + Binary Search — 10 problems</td><td>Full Stack Project 2: Start (MERN or similar, deploy-ready)</td><td>Mixed timed tests: 30 problems / 45 min — simulate OA aptitude rounds</td><td>DBMS: Transaction management, isolation levels, ACID deep dive</td></tr>
+  <tr><td>59–65</td><td>Stack &amp; Queue — 15 problems (valid parentheses, next greater element)</td><td>Full Stack Project 2: Finish + Deploy + README</td><td>Company-specific aptitude patterns: TCS, Infosys, Wipro</td><td>OS: Memory allocation — First Fit, Best Fit, Worst Fit calculations</td></tr>
+  <tr><td>66–72</td><td>Linked Lists — 15 problems (reverse, cycle detection, merge)</td><td>React Advanced: Context API + custom hooks</td><td>Full-length mock aptitude tests — 50 questions / 60 min</td><td>CN: Application layer — HTTP, FTP, SMTP, DNS deep dive</td></tr>
+  <tr><td>73–79</td><td>Recursion + Backtracking basics — 10 problems</td><td>State management: Redux basics or Zustand</td><td>GRE-style verbal preparation for Phase 3</td><td>System Design basics: Load balancing, Caching, CDN, Databases</td></tr>
+  <tr><td>80–86</td><td>Mixed medium: one from each pattern daily</td><td>Full Stack Project 3: AI/ML feature integration (simple ML API call)</td><td>Timed mixed mocks — 3 per week, review wrong answers</td><td>OS Advanced: Page replacement algorithms (LRU, FIFO, Optimal)</td></tr>
+  <tr class="assess"><td>87–90 <span class="tag t-assess">ASSESS</span></td><td>Phase 2 mock OA: 4 Medium problems, 90 min. Honest self-grade.</td><td>Project 3 deployment + all project READMEs polished</td><td>Phase 2 aptitude full mock: 60 questions / 75 min</td><td>Core CS comprehensive mock test: DBMS + OS + CN combined</td></tr>
+</table></div></div>
+
+<!-- PHASE 3 -->
+<div class="phase-bar p3 holo-card anim-scale" style="animation-delay:0.1s"><div class="holo-inner"><div class="phase-num">03</div><div><h3>Phase 3: Interview Ready (Days 91–150)</h3><p>Trees, Graphs, DP + Company-specific prep + HR/System Design + Resume + Portfolio</p></div></div></div>
+<div class="table-wrap anim-up" style="animation-delay:0.15s"><div class="table-inner"><table>
+  <tr><th width="8%">Days</th><th width="25%">DSA Focus</th><th width="25%">Full Stack / Portfolio</th><th width="20%">Aptitude / HR</th><th width="22%">Core CS / System Design</th></tr>
+  <tr><td>91–100</td><td>Trees: 20 problems (BFS, DFS, height, diameter, LCA, traversals)</td><td>Resume v1: ATS-friendly, 1 page, verified project bullets from GitHub</td><td>TCS/Infosys OA pattern — full timed mock tests</td><td>OS + DBMS verbal Q&amp;A — explain concepts out loud</td></tr>
+  <tr><td>101–110</td><td>Graphs: 20 problems (BFS, DFS, shortest path, cycle detection)</td><td>System Design: Design a URL shortener (write doc + diagram)</td><td>Wipro/CTS/Cognizant specific aptitude patterns</td><td>CN verbal Q&amp;A — explain protocols, handshakes out loud</td></tr>
+  <tr><td>111–120</td><td>DP basics: 20 problems (Fibonacci, 0/1 Knapsack, LCS, LIS)</td><td>Portfolio website: design + build + deploy</td><td>Amazon/Goldman Sachs specific aptitude + coding patterns</td><td>HR prep: 10 STAR method stories written + rehearsed</td></tr>
+  <tr><td>121–130</td><td>DP medium: 20 problems (Edit distance, Coin change, Subset sum)</td><td>Portfolio: add all 3 projects with live demos + GitHub links</td><td>Full-length mocks: 3 per week, all OA-format</td><td>System Design: Design a chat application (write doc + diagram)</td></tr>
+  <tr><td>131–140</td><td>Mixed company-specific: TCS, Infosys, Amazon OA problems</td><td>LinkedIn profile: complete, headline, project descriptions, skills</td><td>Mock + review cycle: attempt → identify weak → drill weak spots</td><td>Mock technical interviews: verbal explanation of all Core CS topics</td></tr>
+  <tr class="assess"><td>141–150 <span class="tag t-assess">ASSESS</span></td><td>Full company OA simulation: 4 problems, 90 min, real company format</td><td>GitHub audit: all repos clean, READMEs complete, no dead code visible</td><td>Phase 3 full mock: 60 questions / 75 min — must score 75%+</td><td>Core CS comprehensive verbal test: explain any topic in 2 minutes</td></tr>
+</table></div></div>
+
+<!-- PHASE 4 -->
+<div class="phase-bar p4 holo-card anim-scale" style="animation-delay:0.1s"><div class="holo-inner"><div class="phase-num">04</div><div><h3>Phase 4: Final Sprint (Days 151–194)</h3><p>Sharpen everything. Nothing new. Apply. Interview. Win.</p></div></div></div>
+<div class="table-wrap anim-up" style="animation-delay:0.15s"><div class="table-inner"><table>
+  <tr><th width="10%">Days</th><th width="30%">Daily Focus</th><th width="60%">Specific Actions</th></tr>
+  <tr><td>151–160</td><td>Daily mock OAs</td><td>4 problems, 90 min, company-specific format. Review every wrong answer same day. No new topics.</td></tr>
+  <tr><td>161–170</td><td>Mock interviews daily</td><td>Technical + HR rounds. Use STAR method. Record video of yourself answering. Review and improve.</td></tr>
+  <tr><td>171–175</td><td>Weak spot elimination</td><td>Identify 5 weakest DSA topics from mock OA results. 4 problems per topic per day.</td></tr>
+  <tr><td>176–180</td><td>Core CS revision</td><td>One-page cheat sheets: DBMS, OS, CN. Can explain any topic in under 2 minutes unprompted.</td></tr>
+  <tr><td>181–185</td><td>Final polish</td><td>Resume final version. Project demos scripted. Portfolio live. LinkedIn updated. References ready.</td></tr>
+  <tr><td>186–190</td><td>Apply + light prep</td><td>Apply to all target companies. 2 DSA problems daily. 1 mock interview daily. 8 hours sleep.</td></tr>
+  <tr class="assess"><td>191–194 <span class="tag t-assess">PLACEMENT WEEK</span></td><td>Interview ready</td><td>Zero new learning. Trust the preparation. Sleep well. Eat well. Be on time. Communicate clearly.</td></tr>
+</table></div></div>
+
+<!-- CONTEXT PASTE BLOCK -->
+<div class="section rules holo-card anim-up" style="animation-delay:0.1s;margin-top:20px"><div class="holo-inner"><h3>New Chat Context Block — Paste at Top of Every New Conversation</h3><pre>
+I am Sai Bhanu, BCA 5th semester, Sri GCSR Degree College, Rajam, Andhra Pradesh.
+Campus placements: January 2027. Target: Full Stack Developer (primary) / AI-ML Engineer. 8–12 LPA.
+Currently: Day [UPDATE THIS] of 194-day placement prep. [UPDATE] day streak.
+GitHub: https://github.com/Ysaibhanu99/DSA_Prep
+
+=== COMPLETED SO FAR ===
+DSA (HackerRank, Python):
+- hacker1-3: Solve Me First, Simple Array Sum, Compare Triplets
+- hacker4-6: A Very Big Sum, Plus Minus, Diagonal Difference
+- hacker7-9: Mini-Max Sum, Birthday Cake Candles, Time Conversion
+- hacker10-12: Staircase, Counting Valleys, Sock Merchant
+- hacker13-15: Electronics Shop, Drawing Book, Cats &amp; Mouse
+- hacker16-18: Breaking Records, Migratory Birds, Picking Numbers
+- review1.py: Electronics Shop rewrite (review day)
+[ADD NEW HACKERRANK FILES AS YOU PUSH THEM]
+
+Full Stack:
+- map/filter/reduce: coded + verified ✅
+- Promises + async/await: coded + verified ✅
+- DOM: dom_practice.html (Task Manager app) ✅
+- Fetch API: fetch_practice.js (.then + async/await + error handling) ✅
+- Fetch + DOM: fetch_dom.html ✅
+[ADD NEW FILES HERE]
+
+Aptitude (IndiaBix, on paper):
+- Numbers ✅, HCF/LCM ✅, Percentages ✅, Time &amp; Work ✅, Time &amp; Distance ✅
+[ADD NEW TOPICS HERE]
+
+Core CS (Sanfoundry):
+- DBMS: Normalization 20/20 ✅, Relational Model 20/20 ✅
+- OS: Process Management 17/20 ✅, CPU Scheduling 20/20 ✅, Memory Management ✅
+[ADD NEW RESULTS HERE]
+
+=== TODAY IS DAY [X] — TASKS ===
+- DSA: [problem names] → push GitHub as hackerXX.py
+- Full Stack: [topic + file name to push]
+- Aptitude: [topic] → IndiaBix → paper + photo proof
+- Core CS: [topic] → Sanfoundry → screenshot proof
+- Communication: BBC video/article → 2-min formal English summary
+
+=== RULES FOR THIS CHAT ===
+Brutally honest. No validation. No encouragement without evidence.
+GitHub links verified every time. Photo proofs checked. Screenshots confirmed.
+Dead code flagged immediately. Avoidance patterns called out in real time.
+Only proof counts. "I will" = nothing.
+</pre></div></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ═══════════════════════════════════════
+  // PARTICLES
+  // ═══════════════════════════════════════
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+  resizeCanvas(); window.addEventListener('resize',resizeCanvas);
+  for(let i=0;i<60;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+0.3,dx:(Math.random()-0.5)*0.3,dy:(Math.random()-0.5)*0.3,o:Math.random()*0.15+0.03});
+  function drawP(){ctx.clearRect(0,0,canvas.width,canvas.height);const c=getComputedStyle(document.body).getPropertyValue('--particle-color').trim();particles.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${c},${p.o})`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1});requestAnimationFrame(drawP)}
+  drawP();
+
+  // ═══════════════════════════════════════
+  // THEME TOGGLE
+  // ═══════════════════════════════════════
+  const themeBtn = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('theme');
+  if(saved==='light') { document.body.classList.add('light'); themeBtn.textContent='☀️'; }
+  themeBtn.addEventListener('click',()=>{
+    document.body.classList.toggle('light');
+    const isLight = document.body.classList.contains('light');
+    themeBtn.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+
+  // ═══════════════════════════════════════
+  // DATE & DAY CALCULATION
+  // ═══════════════════════════════════════
+  const START_DATE = new Date(2026,5,18);
+  const TOTAL_DAYS = 194;
+  const PLACEMENT_DATE = new Date(2027,0,1);
+  const now = new Date();
+  const startM = new Date(START_DATE.getFullYear(),START_DATE.getMonth(),START_DATE.getDate());
+  const nowM = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const diffDays = Math.floor((nowM-startM)/(1000*60*60*24))+1;
+  const currentDay = Math.max(1,Math.min(diffDays,TOTAL_DAYS));
+  const daysLeft = TOTAL_DAYS - currentDay;
+  const pct = ((currentDay/TOTAL_DAYS)*100).toFixed(1);
+
+  function fmt(d){const dt=new Date(startM);dt.setDate(dt.getDate()+d-1);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}
+  const todayFull = fmt(currentDay)+', '+now.getFullYear();
+
+  // Update stats
+  document.querySelectorAll('.stat-num').forEach(s=>{
+    const l=s.nextElementSibling.textContent.trim();
+    if(l==='Current Day')s.textContent=currentDay;
+    if(l==='Days Left')s.textContent=daysLeft;
+    if(l==='Complete')s.textContent=pct+'%';
+  });
+
+  // #8 Streak flame
+  const streakEl = document.getElementById('streakStat');
+  const streakVal = parseInt(streakEl.textContent);
+  if(streakVal >= 5) streakEl.innerHTML = streakVal + ' <span class="streak-flame">🔥</span>';
+
+  // Update profile
+  const pp = document.querySelector('.profile .holo-inner p:nth-child(4)');
+  if(pp) pp.innerHTML = pp.innerHTML.replace(/<strong>Today:<\/strong> Day \d+/, `<strong>Today:</strong> Day ${currentDay} <span style="color:var(--text-dim);font-size:12px">(${todayFull})</span>`);
+
+  // Update context
+  const pre = document.querySelector('pre');
+  if(pre) pre.innerHTML = pre.innerHTML.replace(/Currently: Day \[\w+\]|Currently: Day \d+/, `Currently: Day ${currentDay}`);
+
+  // ═══════════════════════════════════════
+  // #5 LIVE COUNTDOWN
+  // ═══════════════════════════════════════
+  function updateCountdown(){
+    const n=new Date();const diff=PLACEMENT_DATE-n;
+    if(diff<=0){document.getElementById('countdown').textContent='🎯 PLACEMENT TIME!';return}
+    const d=Math.floor(diff/(1000*60*60*24)),h=Math.floor((diff%(1000*60*60*24))/(1000*60*60)),m=Math.floor((diff%(1000*60*60))/(1000*60)),s=Math.floor((diff%(1000*60))/1000);
+    document.getElementById('countdown').innerHTML=`${d}<span>d</span> ${String(h).padStart(2,'0')}<span>h</span> ${String(m).padStart(2,'0')}<span>m</span> ${String(s).padStart(2,'0')}<span>s</span>`;
+  }
+  updateCountdown(); setInterval(updateCountdown,1000);
+
+  // ═══════════════════════════════════════
+  // PROGRESS BAR
+  // ═══════════════════════════════════════
+  const phase = currentDay<=30?0:currentDay<=90?1:currentDay<=150?2:3;
+  document.getElementById('progress-bar').innerHTML=`
+    <div class="progress-header"><span class="progress-title">Overall Journey</span><span class="progress-pct">${pct}%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="pf"></div></div>
+    <div class="progress-phases"><span class="${phase===0?'active':''}">Foundation</span><span class="${phase===1?'active':''}">Core Skills</span><span class="${phase===2?'active':''}">Interview Ready</span><span class="${phase===3?'active':''}">Final Sprint</span></div>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{document.getElementById('pf').style.width=pct+'%'}));
+
+  // ═══════════════════════════════════════
+  // TABLE PROCESSING
+  // ═══════════════════════════════════════
+  let todayTasks = {dsa:[],fs:[],apt:[],cs:[]};
+  let todayTaskIds = [];
+
+  document.querySelectorAll('.table-wrap').forEach((wrap,ti)=>{
+    wrap.querySelectorAll('tr').forEach((row,ri)=>{
+      if(ri===0) return;
+      const cells=Array.from(row.querySelectorAll('td'));
+      if(!cells.length) return;
+      const fc=cells[0], text=fc.textContent.trim();
+      const m=text.match(/^(\d+)(?:[-–](\d+))?/);
+      if(!m) return;
+      const sd=parseInt(m[1]),ed=m[2]?parseInt(m[2]):sd;
+
+      let otherTags='';
+      fc.querySelectorAll('.tag').forEach(tag=>{if(!tag.classList.contains('t-done')&&!tag.classList.contains('t-curr'))otherTags+=' '+tag.outerHTML});
+
+      const dayLabel=m[2]?`${sd}–${ed}`:`${sd}`;
+      const dateStr=m[2]?`${fmt(sd)} – ${fmt(ed)}`:fmt(sd);
+      let cls=[];
+      if(row.classList.contains('review'))cls.push('review');
+      if(row.classList.contains('assess'))cls.push('assess');
+
+      // Check if this is today's row — capture tasks BEFORE we modify the cells
+      const isToday = currentDay>=sd && currentDay<=ed;
+      if(isToday && ti===0) { // Phase 1 detailed table
+        const trackNames=['dsa','fs','apt','cs'];
+        cells.slice(1).forEach((c,i)=>{
+          const t=c.textContent.trim();
+          if(t!=='—'&&t!==''&&trackNames[i]) todayTasks[trackNames[i]]=c.innerHTML.split(/<br\s*\/?>/i).map(l=>l.trim()).filter(Boolean);
+        });
+      }
+
+      if(ed<currentDay){cls.push('done');fc.innerHTML=`${dayLabel} <span class="tag t-done">✅</span>${otherTags}<span class="date-label">${dateStr}</span>`}
+      else if(isToday){cls.push('current');fc.innerHTML=`${dayLabel} <span class="tag t-curr">TODAY</span>${otherTags}<span class="date-label">${dateStr}</span>`}
+      else{fc.innerHTML=`${dayLabel}${otherTags}<span class="date-label">${dateStr}</span>`}
+      row.className=cls.join(' ');
+
+      // Checkboxes
+      cells.slice(1).forEach((cell,ci)=>{
+        const t=cell.textContent.trim();
+        if(t==='—'||t==='')return;
+        const lines=cell.innerHTML.split(/<br\s*\/?>/i);
+        const html=lines.map((line,li)=>{
+          const c=line.trim();if(!c)return'';
+          const id=`t-${ti}-${ri}-${ci}-${li}`;
+          const chk=localStorage.getItem(id)==='true';
+          if(isToday) todayTaskIds.push(id);
+          return `<div class="task-item${chk?' checked':''}"><input type="checkbox" id="${id}" ${chk?'checked':''}><label for="${id}">${c}</label></div>`;
+        }).join('');
+        if(html) cell.innerHTML=html;
+        cell.addEventListener('change',e=>{
+          if(e.target.type==='checkbox'){
+            localStorage.setItem(e.target.id,e.target.checked);
+            e.target.closest('.task-item').classList.toggle('checked',e.target.checked);
+            updateTodayRing();
+            checkConfetti();
+          }
+        });
+      });
+    });
+  });
+
+  // ═══════════════════════════════════════
+  // #2 TODAY'S TASKS PANEL + #3 COMPLETION RING
+  // ═══════════════════════════════════════
+  const circ = 2*Math.PI*20;
+  const trackLabels={dsa:'DSA',fs:'Full Stack',apt:'Aptitude',cs:'Core CS'};
+  const trackClasses={dsa:'dsa',fs:'fs',apt:'apt',cs:'cs'};
+
+  function buildTodayPanel(){
+    let tracksHtml='';
+    Object.keys(todayTasks).forEach(k=>{
+      if(!todayTasks[k].length) return;
+      tracksHtml+=`<div class="today-track ${trackClasses[k]}"><div class="today-track-title">${trackLabels[k]}</div>`;
+      todayTasks[k].forEach(t=>tracksHtml+=`<div style="font-size:12.5px;color:var(--text-muted);padding:2px 0">• ${t}</div>`);
+      tracksHtml+='</div>';
+    });
+    if(!tracksHtml) tracksHtml='<div style="color:var(--text-dim)">No tasks found for today in Phase 1 table.</div>';
+
+    document.getElementById('todayPanel').innerHTML=`
+      <div class="today-header">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="completion-ring">
+            <svg width="52" height="52" viewBox="0 0 52 52">
+              <circle class="ring-bg" cx="26" cy="26" r="20"/>
+              <circle class="ring-fill" cx="26" cy="26" r="20" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" id="ringFill"/>
+            </svg>
+            <div class="ring-text" id="ringText">0%</div>
+          </div>
+          <div>
+            <div class="today-title">Today's Mission — Day ${currentDay}</div>
+            <div class="today-date">${todayFull}</div>
+          </div>
+        </div>
+      </div>
+      <div class="today-grid">${tracksHtml}</div>`;
+    updateTodayRing();
+  }
+
+  function updateTodayRing(){
+    if(!todayTaskIds.length) return;
+    const done = todayTaskIds.filter(id=>localStorage.getItem(id)==='true').length;
+    const total = todayTaskIds.length;
+    const p = total?Math.round((done/total)*100):0;
+    const offset = circ - (circ * p / 100);
+    const ring = document.getElementById('ringFill');
+    const txt = document.getElementById('ringText');
+    if(ring) ring.style.strokeDashoffset = offset;
+    if(txt) txt.textContent = p+'%';
+  }
+
+  buildTodayPanel();
+
+  // ═══════════════════════════════════════
+  // #7 WEEKLY STATS
+  // ═══════════════════════════════════════
+  let weekChecked=0, weekTotal=0;
+  const weekStart = Math.max(1, currentDay - (currentDay-1)%7);
+  const weekEnd = Math.min(weekStart+6, TOTAL_DAYS);
+  // Count all task IDs that belong to this week's rows
+  document.querySelectorAll('.table-wrap').forEach((wrap,ti)=>{
+    wrap.querySelectorAll('tr').forEach((row,ri)=>{
+      if(ri===0) return;
+      const fc=row.querySelector('td');if(!fc)return;
+      const text=fc.textContent.trim();
+      const m=text.match(/^(\d+)(?:[-–](\d+))?/);
+      if(!m) return;
+      const sd=parseInt(m[1]),ed=m[2]?parseInt(m[2]):sd;
+      if(sd>=weekStart && ed<=weekEnd){
+        row.querySelectorAll('input[type="checkbox"]').forEach(cb=>{weekTotal++;if(cb.checked)weekChecked++});
+      }
+    });
+  });
+  const weekPct = weekTotal? Math.round((weekChecked/weekTotal)*100) : 0;
+  document.getElementById('weeklyStats').innerHTML = `This week (Days ${weekStart}–${weekEnd}): <strong>${weekChecked}/${weekTotal} tasks</strong> completed (${weekPct}%)`;
+
+  // ═══════════════════════════════════════
+  // #4 CONFETTI
+  // ═══════════════════════════════════════
+  let confettiFired = localStorage.getItem('confetti-day-'+currentDay)==='true';
+  function checkConfetti(){
+    if(confettiFired || !todayTaskIds.length) return;
+    const allDone = todayTaskIds.every(id=>localStorage.getItem(id)==='true');
+    if(allDone){
+      confettiFired=true;
+      localStorage.setItem('confetti-day-'+currentDay,'true');
+      fireConfetti();
+    }
+  }
+  function fireConfetti(){
+    const colors=['#f59e0b','#2dd4bf','#c084fc','#fb7185','#a3e635','#38bdf8','#f97316'];
+    for(let i=0;i<80;i++){
+      const el=document.createElement('div');
+      el.className='confetti-piece';
+      el.style.left=Math.random()*100+'vw';
+      el.style.background=colors[Math.floor(Math.random()*colors.length)];
+      el.style.animationDuration=(Math.random()*2+2)+'s';
+      el.style.animationDelay=(Math.random()*1)+'s';
+      el.style.width=(Math.random()*6+4)+'px';
+      el.style.height=(Math.random()*6+4)+'px';
+      el.style.borderRadius=Math.random()>0.5?'50%':'2px';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),5000);
+    }
+  }
+  checkConfetti();
+
+  // ═══════════════════════════════════════
+  // #1 JUMP TO TODAY
+  // ═══════════════════════════════════════
+  document.getElementById('jumpToday').addEventListener('click',scrollToToday);
+  function scrollToToday(){
+    const row=document.querySelector('tr.current');
+    if(row) row.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  // #6 KEYBOARD SHORTCUT T
+  document.addEventListener('keydown',e=>{
+    if(e.key==='t'||e.key==='T'){
+      if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+      scrollToToday();
+    }
+  });
+
+  // #9 ROW HIGHLIGHT ON SCROLL
+  const rowObs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting && e.target.classList.contains('current')){
+        e.target.classList.add('highlight-pulse');
+        rowObs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.5});
+  const todayRow = document.querySelector('tr.current');
+  if(todayRow) rowObs.observe(todayRow);
+
+  // SCROLL-TRIGGERED ENTRANCE ANIMATIONS
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.style.animationPlayState='running';obs.unobserve(e.target)}});
+  },{threshold:0.08});
+  document.querySelectorAll('.anim-up,.anim-left,.anim-scale').forEach(el=>{el.style.animationPlayState='paused';obs.observe(el)});
+});
+</script>
+</body>
+</html>
