@@ -97,7 +97,7 @@ A beautifully designed, fully interactive single-page placement preparation trac
    ```bash
    git clone https://github.com/Ysaibhanu99/Placement_Tracker.git
    ```
-2. Open `placement_tracker.html` in any modern browser
+2. Open `index.html` in any modern browser
 3. That's it — no build step, no server, no installs
 
 ---
